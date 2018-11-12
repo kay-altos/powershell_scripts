@@ -56,7 +56,7 @@ function Get-PasswordString(){
 
 #const
 $i = 1
-$quantity = 3
+$quantity = 2
 $resourceGroup = "Certification"
 $storageAccountName = "certstorageaccount"
 $location = "westeurope"
@@ -68,12 +68,12 @@ $path = "D:\Cert-$(get-random)"
 $imageName = "W10C8O16v5-image-20181027092335"
 #end const
 #
-
+<#
 Get-AzureRmResourceGroup -Name $resourceGroup -ErrorVariable notPresent -ErrorAction SilentlyContinue
 
 if ($notPresent)
 {
-    # ResourceGroup doesn't exist
+    #ResourceGroup doesn't exist
     #resource group
     New-AzureRmResourceGroup -Name $resourceGroup -Location $location -force
     write-host "RG+"
@@ -86,7 +86,7 @@ else
     New-AzureRmResourceGroup -Name $resourceGroup -Location $location -force
     write-host "RG+"
 }
-
+#>
 
 
 $image = Get-AzureRmImage | Where-Object {$_.Name -eq $imageName}
@@ -111,11 +111,12 @@ $vnet = New-AzureRmVirtualNetwork `
 	-ResourceGroupName $resourceGroup -Location $location `
 	-Name $resourceGroup"-vNET" `
 	-AddressPrefix 192.168.0.0/16 `
-	-Subnet $subnetConfig
+	-Subnet $subnetConfig `
+    -Tag @{ CertOth="Other"}
 write-host "vnet+"
 Add-content $Logfile -value "vnet: $vnet"
 #
-$storageAccount = New-AzureRmStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName -Location $location -SkuName $skuName
+#$storageAccount = New-AzureRmStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName -Location $location -SkuName $skuName
 
 while($i -le $quantity){
 #
@@ -152,7 +153,8 @@ while($i -le $quantity){
 		-Location $location `
 		-Name "$vmName-pip-$(Get-Random)" `
 		-AllocationMethod Static `
-		-IdleTimeoutInMinutes 4
+		-IdleTimeoutInMinutes 4 `
+        -Tag @{ CertOth="Other"}
 	Add-content $Logfile -value "pip +"
     write-host "pip+"
 
@@ -173,7 +175,8 @@ while($i -le $quantity){
 		-ResourceGroupName $resourceGroup `
 		-Location $location `
 		-Name $vmName"-NetworkSecurityGroup" `
-		-SecurityRules $nsgRuleRDP
+		-SecurityRules $nsgRuleRDP `
+        -Tag @{ CertOth="Other"}
 	Add-content $Logfile -value "nsg +"
     write-host "nsg+"
 #set NIC 
@@ -183,7 +186,8 @@ while($i -le $quantity){
 		-Location $location `
 		-SubnetId $vnet.Subnets[0].Id `
 		-PublicIpAddressId $pip.Id `
-		-NetworkSecurityGroupId $nsg.Id
+		-NetworkSecurityGroupId $nsg.Id `
+        -Tag @{ CertOth="Other"}
 	Add-content $Logfile -value "nic +"
     write-host "nic+"
 ###
@@ -197,7 +201,7 @@ while($i -le $quantity){
     write-host "vmConf+"
 ###	
 #create new VM
-	New-AzureRmVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConf
+	New-AzureRmVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConf -Tag @{ CertVM="Vm"}
     write-host "New-AzureRmVM+"
 	Add-content $Logfile -value "vm +"
 #GET RDP FILE  
