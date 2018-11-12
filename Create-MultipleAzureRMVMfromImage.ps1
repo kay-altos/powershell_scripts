@@ -53,7 +53,6 @@ function Get-PasswordString(){
 }
 #
 
-
 #const
 $i = 1
 $quantity = 2
@@ -67,33 +66,14 @@ $skuName = "Standard_LRS"
 $path = "D:\Cert-$(get-random)"
 $imageName = "W10C8O16v5-image-20181027092335"
 #end const
+
 #
-<#
-Get-AzureRmResourceGroup -Name $resourceGroup -ErrorVariable notPresent -ErrorAction SilentlyContinue
-
-if ($notPresent)
-{
-    #ResourceGroup doesn't exist
-    #resource group
-    New-AzureRmResourceGroup -Name $resourceGroup -Location $location -force
-    write-host "RG+"
+$storageAccount = Get-AzureRmStorageAccount -ResourceGroupName $resourceGroup -AccountName $storageAccountName
 #
-}
-else
-{
-    # ResourceGroup exist
-    Remove-AzureRmResourceGroup -Name $resourceGroup -force
-    New-AzureRmResourceGroup -Name $resourceGroup -Location $location -force
-    write-host "RG+"
-}
-#>
-
-
 $image = Get-AzureRmImage | Where-Object {$_.Name -eq $imageName}
 #
 New-Item -ItemType Directory -Path $path -force
 #
-
 
 $Logfile = $path + "\logfile.log"
 write-host "Logfile+"
@@ -105,8 +85,6 @@ write-host "subnetConfig+"
 #
 Add-content $Logfile -value "subnetConfig: $subnetConfig"
 
-
-
 $vnet = New-AzureRmVirtualNetwork `
 	-ResourceGroupName $resourceGroup -Location $location `
 	-Name $resourceGroup"-vNET" `
@@ -116,7 +94,6 @@ $vnet = New-AzureRmVirtualNetwork `
 write-host "vnet+"
 Add-content $Logfile -value "vnet: $vnet"
 #
-#$storageAccount = New-AzureRmStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName -Location $location -SkuName $skuName
 
 while($i -le $quantity){
 #
@@ -143,8 +120,6 @@ while($i -le $quantity){
 	$secureStringPassword = $azVmPassword | ConvertTo-SecureString -asPlainText -Force
 	$cred = New-Object System.Management.Automation.PSCredential($azVmUserName,$secureStringPassword)
 	Add-content $Logfile -value "Cred +"
-#
-	 
 #
 	
 #Get publick ip
@@ -204,17 +179,21 @@ while($i -le $quantity){
 	New-AzureRmVM -ResourceGroupName $resourceGroup -Location $location -VM $vmConf -Tag @{ CertVM="Vm"}
     write-host "New-AzureRmVM+"
 	Add-content $Logfile -value "vm +"
+#
+    $r = Get-AzureRmResource -ResourceName $osDiskName -ResourceGroupName $resourceGroup
+    Set-AzureRmResource -Tag @{ CertOth="Other"} -ResourceId $r.ResourceId -Force
+#
 #GET RDP FILE  
-    Start-Sleep -s 250
+    Start-Sleep -s 25
 	Get-AzureRmRemoteDesktopFile -ResourceGroupName $resourceGroup -Name $vmName -LocalPath $LocalRdpFilePath
 	Add-content $Logfile -value "RDP +"
 #
 	Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourceGroup `
 		-VMName $vmName `
 		-Location $location `
-		-FileUri https://raw.githubusercontent.com/kay-altos/CustomScriptExtension1/master/exten1.ps1 `
-		-Run 'exten1.ps1' `
-		-Name ScriptExtension
+		-FileUri https://raw.githubusercontent.com/kay-altos/powershell_scripts/master/cusctom-exten-script1.ps1 `
+		-Run 'cusctom-exten-script1.ps1' `
+		-Name ScriptExtension1
 	Add-content $Logfile -value "EXT +"
     write-host "EXT+"
     $publicIp123 = Get-AzureRmPublicIpAddress -Name $pip.Name -ResourceGroupName $resourceGroup
