@@ -188,9 +188,11 @@ while($i -le $quantity){
 	Get-AzureRmRemoteDesktopFile -ResourceGroupName $resourceGroup -Name $vmName -LocalPath $LocalRdpFilePath
 	Add-content $Logfile -value "RDP +"
 #
+    $Arguments = "-nop 'nop'"
 	Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourceGroup `
 		-VMName $vmName `
 		-Location $location `
+        -Argument $Arguments `
 		-FileUri https://raw.githubusercontent.com/kay-altos/powershell_scripts/master/cusctom-exten-script1.ps1 `
 		-Run 'cusctom-exten-script1.ps1' `
 		-Name 'cusctom-exten-script1'
