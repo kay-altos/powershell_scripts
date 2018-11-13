@@ -188,12 +188,14 @@ while($i -le $quantity){
 	Get-AzureRmRemoteDesktopFile -ResourceGroupName $resourceGroup -Name $vmName -LocalPath $LocalRdpFilePath
 	Add-content $Logfile -value "RDP +"
 #
-	Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourceGroup `
-		-VMName $vmName `
-		-Location $location `
+    Set-AzureRMVMCustomScriptExtension -ResourceGroupName "CERTIFICATION" `
+		-VMName "VGCert1" `
+		-Location "westeurope" `
+		-TypeHandlerVersion "1.1" `
 		-FileUri https://raw.githubusercontent.com/kay-altos/powershell_scripts/master/cusctom-exten-script1.ps1 `
 		-Run 'cusctom-exten-script1.ps1' `
-		-Name ScriptExtension1
+		-Name 'cusctom-exten-script1'
+#
 	Add-content $Logfile -value "EXT +"
     write-host "EXT+"
     $publicIp123 = Get-AzureRmPublicIpAddress -Name $pip.Name -ResourceGroupName $resourceGroup
