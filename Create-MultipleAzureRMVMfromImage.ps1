@@ -192,6 +192,7 @@ while($i -le $quantity){
 	Set-AzureRMVMCustomScriptExtension -ResourceGroupName $resourceGroup `
 		-VMName $vmName `
 		-Location $location `
+        -TypeHandlerVersion "1.1" `
         -Argument $Arguments `
 		-FileUri https://raw.githubusercontent.com/kay-altos/powershell_scripts/master/cusctom-exten-script1.ps1 `
 		-Run 'cusctom-exten-script1.ps1' `
