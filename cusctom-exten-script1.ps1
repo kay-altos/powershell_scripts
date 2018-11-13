@@ -5,7 +5,7 @@ Start-Transcript
 #>
 
 
-Param (
+param (
     [string]$nop
 )
 
