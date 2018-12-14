@@ -22,5 +22,6 @@ for($iu = 2; $iu -le 4; $iu++){
     echo $PasswordU
 }
 
+Get-ScheduledTask -TaskName ServerManager | Disable-ScheduledTask -Verbose
 
 Stop-Transcript
